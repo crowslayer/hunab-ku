@@ -1,0 +1,42 @@
+
+#Program
+*.html
+*.geojson
+**/*.html
+**/*.geojson
+
+# IDEs and editors
+.idea/
+.venv/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.cursor/
+*.swp
+*~
+*#
+.qodo
+
+# Dependency directories
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+.npm
+
+# System files
+.DS_Store
+Thumbs.db
+
