@@ -1,15 +1,16 @@
 import ttkbootstrap as tb
 from tkinter import messagebox
 
-from models.plano import PlanoCatastral
-from models.mapa import Mapa
+from src.models.plano import PlanoCatastral
+from src.models.mapa import Mapa
+from src.utils.render_browser import RenderInBrowser
 
 
 class CreatePropertyWithRumbos(tb.Frame):
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
         self.rows = []
-        self.mapa = Mapa()
+        self.map = Mapa()
 
         # Título
         tb.Label(self, text="Ingreso por rumbo y distancia",
@@ -32,7 +33,7 @@ class CreatePropertyWithRumbos(tb.Frame):
                                       values=["UTM", "Decimal", "DMS"],
                                       state="readonly", width=15)
         self.type_combo.pack(side="left", padx=10)
-        self.type_combo.bind("<<ComboboxSelected>>", self._actualizar_estado_combo)
+        self.type_combo.bind("<<ComboboxSelected>>", self._update_state_combo)
 
         # Estado (zona UTM)
         zona_frame = tb.Frame(self)
@@ -86,28 +87,28 @@ class CreatePropertyWithRumbos(tb.Frame):
             tb.Label(self.rumbo_frame, text=h).grid(row=0, column=i, padx=5, pady=5)
 
 
-    def _actualizar_estado_combo(self, event=None):
+    def _update_state_combo(self, event=None):
         if self.type_var.get() == "UTM":
             self.state_combo.configure(state="readonly")
         else:
             self.state_combo.set("")
             self.state_combo.configure(state="disabled")
 
-    def _zona_desde_estado(self):
-        estado = self.state_var.get()
-        if "Zona 11" in estado:
+    def _zone_from_state(self):
+        state = self.state_var.get()
+        if "Zona 11" in state:
             return 11
-        elif "Zona 12" in estado:
+        elif "Zona 12" in state:
             return 12
-        elif "Zona 13" in estado:
+        elif "Zona 13" in state:
             return 13
-        elif "Zona 14" in estado:
+        elif "Zona 14" in state:
             return 14
-        elif "Zona 15" in estado:
+        elif "Zona 15" in state:
             return 15
-        elif "Zona 16" in estado:
+        elif "Zona 16" in state:
             return 16
-        elif "Zona 17" in estado:
+        elif "Zona 17" in state:
             return 17
         return 16  # default
 
@@ -136,7 +137,7 @@ class CreatePropertyWithRumbos(tb.Frame):
             messagebox.showerror("Error", "Latitud y longitud inicial deben ser válidos.")
             return
 
-        zona = self._zona_desde_estado() if self.type_var.get() == "UTM" else 16
+        zona = self._zone_from_state() if self.type_var.get() == "UTM" else 16
         plano = PlanoCatastral(lat0, lon0)
 
         for rumbo_entry, dist_entry in self.rows:
@@ -158,13 +159,14 @@ class CreatePropertyWithRumbos(tb.Frame):
                 return
 
         try:
-            property = plano.add_property(name)
-            self.mapa.add_property(property)
-            self.mapa.save_map()
+            real_state = plano.add_property(name)
+            self.map.add_property(real_state)
+            map_name = self.map.save_map()
 
-            area = property.area_m2
-            perimeter = property.perimeter_m
-            messagebox.showinfo("Predio creado", f"Área: {area:,.2f} m²\nPerímetro: {perimeter:,.2f} m\nMapa generado como 'mapa_predios.html'.")
+            area = real_state.area_m2
+            perimeter = real_state.perimeter_m
+            messagebox.showinfo("Predio creado", f"Área: {area:,.2f} m²\nPerímetro: {perimeter:,.2f} m\nMapa generado como {map_name}.")
+            RenderInBrowser.show(map_name)
 
         except Exception as e:
             messagebox.showerror("Error inesperado", str(e))

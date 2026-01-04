@@ -1,20 +1,20 @@
-import os
 import ttkbootstrap as tb
-import webbrowser
 import tkinter as tk
 
 from ttkbootstrap.widgets.scrolled import ScrolledText
-
-from models.mapa import Mapa
-
+from src.models.mapa import Mapa
 from tkinter import messagebox
-from models.property import Property
-from utils.coordenada import Coordenada
-from utils.exportador import ExportadorGeoJSON
-from models.plano import PlanoCatastral
+from src.models.property import Property
+from src.utils.coordinates import Coordinates
+from src.utils.export_geojson import ExportGeoJSON
+from src.models.plano import PlanoCatastral
+from src.utils.render_browser import RenderInBrowser
 
 
-class DrawProperty(tb.Frame):
+class LoadRealEstates(tb.Frame):
+    default_name = 'mapa_predios'
+    map_name = None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.properties = []
@@ -46,9 +46,6 @@ class DrawProperty(tb.Frame):
         self.button_export = tb.Button(self.frame_buttons, text="Exportar a GeoJSON", command=self.export_geojson)
         self.button_export.grid(row=0, column=2, padx=10)
 
-        # self.boton_plano = tb.Button(self, text="Cargar desde Plano", command=self.cargar_desde_plano)
-        # self.boton_plano.pack()
-
         tb.Label(self, text="Predios procesados:",
                   font=("Segoe UI", 11, "bold")).pack(pady=(10, 5))
 
@@ -76,39 +73,40 @@ class DrawProperty(tb.Frame):
                 coords = []
                 for par in coords_raw:
                     este, norte = map(float, par.strip().split())
-                    coords.append(Coordenada(este, norte))
+                    coords.append(Coordinates(este, norte))
 
-                property = Property(name, coords)
-                self.properties.append(property)
-                self.map.add_property(property)
-                self.property_list.insert('end', f"{property.name} ({len(coords)} vértices)")
+                realty = Property(name, coords)
+                self.properties.append(realty)
+                self.map.add_property(realty)
+                self.property_list.insert('end', f"{realty.name} ({len(coords)} vértices)")
 
             messagebox.showinfo("Éxito", f"{len(self.properties)} predio(s) procesado(s) correctamente.")
 
         except Exception as e:
-            messagebox.showerror("Error", f"Ocurrió un error: {str(e)}")
+            messagebox.showerror("Error", f"Ocurrió un error: {str(e)}", icon="error")
 
     def show_map(self):
         if not self.properties:
-            messagebox.showwarning("Aviso", "No hay predios procesados.")
+            messagebox.showwarning("Aviso", "No hay predios procesados.", icon="warning")
             return
-        self.map.save_map()
-        ruta_html = os.path.abspath("mapa_predios.html")
-        webbrowser.open_new_tab(f"file://{ruta_html}")
+        map_name = self.map.save_map()
+        RenderInBrowser.show(map_name)
+
         messagebox.showinfo("Mapa", "Mapa generado y abierto en el navegador.")
-        # messagebox.showinfo("Mapa", "El mapa se ha guardado como 'mapa_predios.html' y puede abrirse en el navegador.")
+
 
     def export_geojson(self):
         if not self.properties:
-            messagebox.showwarning("Aviso", "No hay predios para exportar.")
+            messagebox.showwarning("Aviso", "No hay predios para exportar.", icon="error")
             return
-        ExportadorGeoJSON.export(self.properties)
+        json_name = ExportGeoJSON.export(self.properties)
+        RenderInBrowser.show(json_name)
         messagebox.showinfo("GeoJSON", "Archivo 'predios.geojson' generado exitosamente.")
 
     def load_from_plane(self):
         texto = self.input.get("1.0", 'end').strip()
         if not texto:
-            messagebox.showwarning("Aviso", "No se ingresaron datos del plano.")
+            messagebox.showwarning("Aviso", "No se ingresaron datos del plano.", icon="error")
             return
 
         try:
@@ -128,15 +126,15 @@ class DrawProperty(tb.Frame):
             coords_latlon = plano.get_polygon()
 
             # Crear coordenadas en objeto Coordenada
-            coords_obj = [Coordenada(este=0, norte=0) for _ in coords_latlon]  # placeholder
+            coords_obj = [Coordinates(east=0, north=0) for _ in coords_latlon]  # placeholder
 
             # Sobrescribimos to_latlon() para este uso
             for i, (lat, lon) in enumerate(coords_latlon):
                 coords_obj[i].to_latlon = lambda lat=lat, lon=lon: (lat, lon)
 
-            property = Property("Predio desde plano", coords_obj)
-            self.properties.append(property)
-            self.map.add_property(property)
+            real_state = Property("Predio desde plano", coords_obj)
+            self.properties.append(real_state)
+            self.map.add_property(real_state)
 
             messagebox.showinfo("Éxito", "Plano cargado correctamente.")
 

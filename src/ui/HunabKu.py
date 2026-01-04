@@ -1,12 +1,16 @@
 import ttkbootstrap as tb
 
-from ui.create_property_rumbo import CreatePropertyWithRumbos
-from ui.create_property import CreateProperty
-from ui.draw_property import DrawProperty
+from src.ui.create_property_rumbo import CreatePropertyWithRumbos
+from src.ui.create_property import CreateProperty
+from src.ui.load_real_estates import LoadRealEstates
 
 
 class HunabKu:
     def __init__(self, root, title=None):
+        # Frame principal
+        self.main_frame = tb.Frame(root)
+        self.main_frame.pack(fill="both", expand=True)
+
         self.root = root
         if title is None:
             self.root.title("Planos Catastrales")
@@ -22,20 +26,17 @@ class HunabKu:
         # Footer
         self.setup_footer()
 
-        # Frame principal
-        self.main_frame = tb.Frame(root)
-        self.main_frame.pack(fill="both", expand=True)
-
     def setup_menu(self):
         menu_principal = tb.Menu(self.root)
         archivo_menu = tb.Menu(menu_principal, tearoff=0)
-        archivo_menu.add_command(label="Carga Masiva", command=self.show_property)
-        archivo_menu.add_command(label="Geolocalizar", command=self.show_geolocate)
-        archivo_menu.add_command(label="Predio Coordenadas", command=self.show_geolocate_rumbo)
         archivo_menu.add_separator()
         archivo_menu.add_command(label="Salir", command=self.root.quit)
 
         menu_principal.add_cascade(label="Archivo", menu=archivo_menu)
+        menu_principal.add_command(label="Carga Masiva", command=self.show_property)
+        menu_principal.add_command(label="Geolocalizar", command=self.show_geolocate)
+        menu_principal.add_command(label="Predio Coordenadas", command=self.show_geolocate_rumbo)
+
         self.root.config(menu=menu_principal)
 
     def setup_footer(self):
@@ -55,7 +56,7 @@ class HunabKu:
 
     def show_property(self):
         self.clear_main_frame()
-        download_frame = DrawProperty(self.main_frame)
+        download_frame = LoadRealEstates(self.main_frame)
         download_frame.pack(fill="both", expand=True)
 
     def show_geolocate(self):

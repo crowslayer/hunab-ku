@@ -26,17 +26,9 @@ pids
 *.seed
 *.pid.lock
 
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-.npm
-
-# System files
-.DS_Store
-Thumbs.db
+# Compilations
+build
+dist
+*.spec
+*.version
 

@@ -1,10 +1,11 @@
 import ttkbootstrap as tb
-from tkinter import messagebox
 
-from utils.exportador import ExportadorGeoJSON
-from models.mapa import Mapa
-from utils.coordenada import Coordenada
-from models.property import Property
+from tkinter import messagebox
+from src.utils.export_geojson import ExportGeoJSON
+from src.models.mapa import Mapa
+from src.utils.coordinates import Coordinates
+from src.models.property import Property
+from src.utils.render_browser import RenderInBrowser
 
 
 class CreateProperty(tb.Frame):
@@ -144,7 +145,7 @@ class CreateProperty(tb.Frame):
             try:
                 x = float(x_entry.get().replace(",", ""))
                 y = float(y_entry.get().replace(",", ""))
-                coord = Coordenada(x, y, zona=zona)
+                coord = Coordinates(x, y, zone=zona)
                 coordinates.append(coord)
             except ValueError:
                 x_entry.configure(background="#ffcdd2")  # rojo claro
@@ -157,14 +158,17 @@ class CreateProperty(tb.Frame):
             return
 
         try:
-            property = Property(name, coordinates)
-            self.map.add_property(property)
-            self.map.save_map()
-            ExportadorGeoJSON.export([property], f"{name.replace(' ', '_').lower()}.geojson")
+            realty = Property(name, coordinates)
+            map_name = name.replace(' ', '_').lower()
+            self.map.map_name = map_name
+            self.map.add_property(realty)
+            map_name_final = self.map.save_map()
+            self.export(realty, map_name)
 
-            area = property.area_m2
-            perimetro = property.perimeter_m
-            messagebox.showinfo("Predio creado", f"Área: {area:,.2f} m²\nPerímetro: {perimetro:,.2f} m\nMapa generado como 'mapa_predios.html'.")
+            area = realty.area_m2
+            perimeter = realty.perimeter_m
+            messagebox.showinfo("Predio creado", f"Área: {area:,.2f} m²\nPerímetro: {perimeter:,.2f} m\nMapa generado como '{map_name}'.")
+            self.show_map(map_name_final)
             self.reset_form()
         except Exception as e:
             messagebox.showerror("Error inesperado", str(e))
@@ -179,3 +183,12 @@ class CreateProperty(tb.Frame):
         self.rows.clear()
         self._crete_headers()
         self.add_row()
+
+    def show_map(self,map_name):
+        if map_name:
+            RenderInBrowser.show(map_name)
+
+    def export(self, realty ,map_name):
+        if realty:
+            filename = ExportGeoJSON.export([realty], f"{map_name.replace(' ', '_').lower()}.geojson")
+            RenderInBrowser.show(filename)

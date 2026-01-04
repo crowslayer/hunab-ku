@@ -3,7 +3,7 @@ import ttkbootstrap as tb
 import os
 import sys
 from typing import Optional
-from ui.HunabKu import HunabKu
+from src.ui.HunabKu import HunabKu
 
 
 def resource_path(relative_path: str) -> str:
@@ -30,17 +30,14 @@ def run():
     # Cargar icono con manejo de errores
     try:
         icon_path = resource_path("main.ico")
-        #icon_path = os.path.join(os.path.dirname(__file__), "main.ico")
-
         root.iconbitmap(icon_path)
     except Exception as e:
         logging.warning(f"No se pudo cargar el icono: {e}")
 
     root.geometry(f'{app_width}x{app_height}+{x}+{y}')
 
-    app = HunabKu(root, "Hunab Ku")
-    app.run()
-
+    HunabKu(root, "Hunab Ku")
+    root.mainloop()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
