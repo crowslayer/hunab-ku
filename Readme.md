@@ -1,6 +1,10 @@
 # Hunab-ku
 
- Aplicación para dibujar y ubicar geográficamente un predio o inmueble, tomando como referencia las coordenadas en formato UTM, proporcionadas en planos catastrales. Al terminar, se puede exportar los planos a un archivo HTML precargado en un mapa, o en su defecto, a formato GeoJSON.
+ 🗺️ Geospatial desktop application for locating cadastral properties using UTM coordinates, bearings and distances.
+
+Hunab-ku is a Python desktop application designed to help work with cadastral and geospatial information.
+
+The application allows users to calculate locations from UTM coordinates, bearings and distances, visualize the resulting geometry and export the information to formats such as HTML and GeoJSON.
 
 ## License
 
@@ -43,16 +47,16 @@ Hunab-ku es una herramienta diseñada para facilitar la creación y geolocalizac
 3. Crea un entorno virtual (opcional, pero recomendado):
 
     ```bash
-   python -m venv venv
+   python -m venv .venv
    
 4. Activa el entorno virtual:
     - En Windows:
         ```bash
-        venv\Scripts\activate
+        .venv\Scripts\activate
     - En masOS
 
         ```bash
-        source venv\bin\activate
+        source .venv\bin\activate
 
 5. Instala las dependencias:
 
